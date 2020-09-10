@@ -1,16 +1,5 @@
-# tnb_srm
+#Baca lebih lanjut
+Project Flutter Toko Sprei By Taufiq Nur Bahtiar.
 
-Sweet Room Customer Order
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+#Getting Started
+All software, functions and designs are the property of Taufiq Nur Bahtiar or shortened to TNB and / or Mr. TNB. Taking ideas or selling ideas from any software that I make without my permission (TNB) as the maker. Is a forbidden act, and is considered as absolute theft. I have the right to ask for responsibility either forcibly or for compensation based on applicable state law. Use is permitted as long as I provide public or special access. Using my software is subject to the conditions I make.

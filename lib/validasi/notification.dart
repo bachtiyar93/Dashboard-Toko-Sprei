@@ -2,15 +2,15 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
-class Admin extends StatefulWidget {
+class homePage extends StatefulWidget {
   final VoidCallback signOut;
-  Admin(this.signOut);
+  homePage(this.signOut);
 
   @override
-  _AdminState createState() => _AdminState();
+  _homePageState createState() => _homePageState();
 }
 
-class _AdminState extends State<Admin> {
+class _homePageState extends State<homePage> {
   signOut() {
     setState(() {
       widget.signOut();

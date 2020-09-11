@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'package:custom_progress_dialog/custom_progress_dialog.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +15,14 @@ class Login extends StatefulWidget {
 }
 
  enum LoginStatus {
-  admin,
-  notSignIn
+  suksesSignIn,
+  belumSignIn
 }
 
 class _LoginState extends State<Login> {
-  LoginStatus _loginStatus = LoginStatus.notSignIn;
-  String username, password;
+  LoginStatus _loginStatus = LoginStatus.belumSignIn;
+  String phone, password, token;
+  final notifikasiFCM = FirebaseMessaging();
   final _key = new GlobalKey<FormState>();
   bool _secureText = true;
   showHide() {
@@ -35,32 +37,32 @@ class _LoginState extends State<Login> {
       form.save();
       login();
       _progressDialog.showProgressDialog(context,
-          dismissAfter: Duration(seconds: 5),
-          textToBeDisplayed: 'Waiting Connection...', onDismiss: () {
+          dismissAfter: Duration(seconds: 10 ),
+          textToBeDisplayed: 'Membaca Database',
+          onDismiss: () {
             //things to do after dismissing -- optional
           });
       //dismissAfter - if null then progress dialog won't dismiss until dismissProgressDialog is called from the code.
     }
   }
-
   ProgressDialog _progressDialog = ProgressDialog();
 
 //Base Pengecekan Login
   login() async {
     final response = await http.post(SumberApi.login,
-        body: {"id_username": username, "password": password});
+        body: {"id_username": phone, "password": password, "token":token});
     final data = jsonDecode(response.body);
     int value = data['value'];
     String pesan = data['message'];
     String usernameAPI = data['id_username'];
     String namaAPI = data['id_nama'];
     String ktp = data['id_ktp'];
-    _progressDialog.dismissProgressDialog(context);
     if (value == 1) {
       setState(() {
-        _loginStatus = LoginStatus.admin;
-        savePref1(value, usernameAPI, namaAPI, ktp);
+        _loginStatus = LoginStatus.suksesSignIn;
+        saveInformasiLogin(value, usernameAPI, namaAPI, ktp);
       });
+      _progressDialog.dismissProgressDialog(context);
       showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -69,6 +71,7 @@ class _LoginState extends State<Login> {
             );
           });
     } else {
+      _progressDialog.dismissProgressDialog(context);
       showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -79,7 +82,7 @@ class _LoginState extends State<Login> {
     }
   }
 
-  savePref1(int value, String usernameApi, String namaApi, String id) async {
+  saveInformasiLogin(int value, String usernameApi, String namaApi, String id) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       preferences.setInt("value", value);
@@ -88,7 +91,7 @@ class _LoginState extends State<Login> {
       preferences.setString("id_ktp", id);
       // ignore: deprecated_member_use
       preferences.commit();
-      _loginStatus = LoginStatus.admin;
+      _loginStatus = LoginStatus.suksesSignIn;
     });
   }
 
@@ -96,15 +99,15 @@ class _LoginState extends State<Login> {
       ktp,
       admin;
 
-  getPref() async {
+  konfirmasiDariServer() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       value = preferences.getInt("value");
       ktp = preferences.getString("id_ktp");
       if (value == 1) {
-        _loginStatus = value == 1 ? LoginStatus.admin : LoginStatus.notSignIn;
+        _loginStatus = value == 1 ? LoginStatus.suksesSignIn : LoginStatus.belumSignIn;
       } else {
-        _loginStatus = LoginStatus.notSignIn;
+        _loginStatus = LoginStatus.belumSignIn;
       }
     });
   }
@@ -132,7 +135,7 @@ class _LoginState extends State<Login> {
         preferences.clear();
         // ignore: deprecated_member_use
         preferences.commit();
-        _loginStatus = LoginStatus.notSignIn;
+        _loginStatus = LoginStatus.belumSignIn;
       });
     } else {
       showDialog(
@@ -147,8 +150,13 @@ class _LoginState extends State<Login> {
 
   @override
   void initState() {
+
+    //Mendapatkan Token
+    notifikasiFCM.getToken().then((token) => setState(() {
+      this.token = token;
+    }));
     super.initState();
-    getPref();
+    konfirmasiDariServer();
   }
 
 //Form Pengisian Formulir Login
@@ -156,7 +164,7 @@ class _LoginState extends State<Login> {
   // ignore: missing_return
   Widget build(BuildContext context) {
     switch (_loginStatus) {
-      case LoginStatus.notSignIn:
+      case LoginStatus.belumSignIn:
         return Scaffold(
           body: Form(
             key: _key,
@@ -185,12 +193,12 @@ class _LoginState extends State<Login> {
                       // ignore: missing_return
                       validator: (e) {
                         if (e.isEmpty) {
-                          return "Please insert username";
+                          return "Silahkan Masukan Nomor telepon terdaftar";
                         }
                       },
-                      onSaved: (e) => username = e,
+                      onSaved: (e) => phone = e,
                       decoration: InputDecoration(
-                        labelText: "Username",
+                        labelText: "Phone",
                       ),
                     ),
                   ],
@@ -199,7 +207,7 @@ class _LoginState extends State<Login> {
                   // ignore: missing_return
                   validator: (e) {
                     if (e.isEmpty) {
-                      return "Please insert password";
+                      return "Masukan password anda";
                     }
                   },
                   obscureText: _secureText,
@@ -266,8 +274,8 @@ class _LoginState extends State<Login> {
           ),
         );
         break;
-      case LoginStatus.admin:
-        return Admin(signOut);
+      case LoginStatus.suksesSignIn:
+        return homePage(signOut);
         // TODO: Handle this case.
         break;
     }

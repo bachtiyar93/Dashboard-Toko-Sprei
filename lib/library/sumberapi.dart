@@ -1,5 +1,5 @@
 class SumberApi {
-  static String login = "http://android.sweetroommedan.com/login.php";
+  static String login = "https://sweetroommedan.com/android/login.php";
   static String logout = "http://android.sweetroommedan.com/logout.php";
   static String datanotif = "http://android.sweetroommedan.com/datanotif.php";
   static String deletePegawai = "http://android.sweetroommedan.com/deletePegawai.php";
